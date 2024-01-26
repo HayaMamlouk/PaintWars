@@ -5,7 +5,7 @@
 #  Prénom Nom: Haya MAMLOUk
 
 def get_team_name():
-    return "[ team with no name ]" # à compléter (comme vous voulez)
+    return "[ incredibles ]" # à compléter (comme vous voulez)
 
 def aller_tout_droit(sensors):
     translation = 1 * sensors["sensor_front"]["distance"] 
@@ -33,10 +33,12 @@ def follow_enemy(sensors):
     Architecture de subsomption verified
     foncer vers robot ET eviter mur
     """
-    if sensors["sensor_front"]["distance_to_robot"]!=1 or sensors["sensor_front_left"]["distance_to_robot"]!=1 or sensors["sensor_front_right"]["distance_to_robot"]!=1 :
+    front_detection = sensors["sensor_front"]["distance_to_robot"]!=1 or sensors["sensor_front_left"]["distance_to_robot"]!=1 or sensors["sensor_front_right"]["distance_to_robot"]!=1 
+    back_detection = sensors["sensor_back"]["distance_to_robot"]!=1 or sensors["sensor_back_left"]["distance_to_robot"]!=1 or sensors["sensor_back_right"]["distance_to_robot"]!=1 
+    if front_detection or back_detection:
         if sensors["sensor_front"]["isRobot"] == True and sensors["sensor_front"]["isSameTeam"] == False:
-            translation = aller_vers_robot(sensors)[0]
-            rotation = aller_vers_robot(sensors)[1]
+            translation = explore(sensors)[0]
+            rotation = explore(sensors)[1]
     else:
         if sensors["sensor_front"]["distance_to_wall"]!=1 or sensors["sensor_front_left"]["distance_to_wall"]!=1 or sensors["sensor_front_right"]["distance_to_wall"]!=1 :
             translation = eviter_les_murs(sensors)[0]
@@ -44,6 +46,7 @@ def follow_enemy(sensors):
         else :
             translation = explore(sensors)[0]
             rotation = explore(sensors)[1]
+    return translation, rotation
 
 def step(robotId, sensors):
 
