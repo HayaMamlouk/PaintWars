@@ -11,6 +11,11 @@ def aller_tout_droit(sensors):
     translation = 1 * sensors["sensor_front"]["distance"] 
     rotation = (0) * sensors["sensor_front_left"]["distance"] + (0) * sensors["sensor_front_right"]["distance"]
     return translation, rotation
+
+def reculer_tout_droit(sensors):
+    translation = (-1) * sensors["sensor_back"]["distance"] 
+    rotation = (0) * sensors["sensor_back_left"]["distance"] + (0) * sensors["sensor_back_right"]["distance"]
+    return translation, rotation
     
 def eviter_les_murs(sensors):
     translation = 1 * sensors["sensor_front"]["distance_to_wall"] 
@@ -33,32 +38,52 @@ def follow_enemy(sensors):
     Architecture de subsomption verified
     foncer vers robot ET eviter mur
     """
+    is_enemy = sensors["sensor_front"]["isRobot"] == True and sensors["sensor_front"]["isSameTeam"] == False
     front_detection = sensors["sensor_front"]["distance_to_robot"]!=1 or sensors["sensor_front_left"]["distance_to_robot"]!=1 or sensors["sensor_front_right"]["distance_to_robot"]!=1 
     back_detection = sensors["sensor_back"]["distance_to_robot"]!=1 or sensors["sensor_back_left"]["distance_to_robot"]!=1 or sensors["sensor_back_right"]["distance_to_robot"]!=1 
-    if front_detection or back_detection:
-        if sensors["sensor_front"]["isRobot"] == True and sensors["sensor_front"]["isSameTeam"] == False:
-            translation = explore(sensors)[0]
-            rotation = explore(sensors)[1]
-    else:
-        if sensors["sensor_front"]["distance_to_wall"]!=1 or sensors["sensor_front_left"]["distance_to_wall"]!=1 or sensors["sensor_front_right"]["distance_to_wall"]!=1 :
+
+    if front_detection and is_enemy:
+        translation = aller_tout_droit(sensors)[0]
+        rotation = aller_tout_droit(sensors)[1]
+    elif back_detection and is_enemy:
+        translation = reculer_tout_droit(sensors)[0]
+        rotation = reculer_tout_droit(sensors)[1]
+    elif sensors["sensor_front"]["distance_to_wall"]!=1 or sensors["sensor_front_left"]["distance_to_wall"]!=1 or sensors["sensor_front_right"]["distance_to_wall"]!=1 :
             translation = eviter_les_murs(sensors)[0]
             rotation = eviter_les_murs(sensors)[1]
-        else :
-            translation = explore(sensors)[0]
-            rotation = explore(sensors)[1]
+    else :
+        translation = explore(sensors)[0]
+        rotation = explore(sensors)[1]
     return translation, rotation
+    
+def get_extended_sensors(sensors):
+    for key in sensors:
+        sensors[key]["distance_to_robot"] = 1.0
+        sensors[key]["distance_to_wall"] = 1.0
+        if sensors[key]["isRobot"] == True:
+            sensors[key]["distance_to_robot"] = sensors[key]["distance"]
+        else:
+            sensors[key]["distance_to_wall"] = sensors[key]["distance"]
+    return sensors
 
 def step(robotId, sensors):
 
-    translation = 1 # vitesse de translation (entre -1 et +1)
-    rotation = 0 # vitesse de rotation (entre -1 et +1)
+    # translation = 1 # vitesse de translation (entre -1 et +1)
+    # rotation = 0 # vitesse de rotation (entre -1 et +1)
 
-    if sensors["sensor_front_left"]["distance"] < 1 or sensors["sensor_front"]["distance"] < 1:
-        rotation = 0.5  # rotation vers la droite
-    elif sensors["sensor_front_right"]["distance"] < 1:
-        rotation = -0.5  # rotation vers la gauche
+    # if sensors["sensor_front_left"]["distance"] < 1 or sensors["sensor_front"]["distance"] < 1:
+    #     rotation = 0.5  # rotation vers la droite
+    # elif sensors["sensor_front_right"]["distance"] < 1:
+    #     rotation = -0.5  # rotation vers la gauche
 
-    if sensors["sensor_front"]["isRobot"] == True and sensors["sensor_front"]["isSameTeam"] == False:
-        enemy_detected_by_front_sensor = True # exemple de détection d'un robot de l'équipe adversaire (ne sert à rien)
+    # if sensors["sensor_front"]["isRobot"] == True and sensors["sensor_front"]["isSameTeam"] == False:
+    #     enemy_detected_by_front_sensor = True # exemple de détection d'un robot de l'équipe adversaire (ne sert à rien)
+    sensors = get_extended_sensors(sensors)
+    if robotId == 3 or robotId ==4 :
+        translation = follow_enemy(sensors)[0]
+        rotation = follow_enemy(sensors)[1]
+    else :
+        translation = explore(sensors)[0]
+        rotation = explore(sensors)[1]
 
     return translation, rotation
