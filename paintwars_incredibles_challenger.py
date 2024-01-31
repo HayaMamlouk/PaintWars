@@ -45,6 +45,44 @@ def follow_enemy(sensors):
             translation = explore(sensors)[0]
             rotation = explore(sensors)[1]
 
+
+def follow_enemy_kaan(robotId,sensors):
+     if robotId == 2:  #FOLLOWS THE ENEMY (subsomption)
+        if sensors["sensor_front"]["isRobot"] == True and sensors["sensor_front"]["isSameTeam"] == False:
+    
+    
+    	
+    	    enemy_detected_by_front_sensor = True # exemple de détection d'un robot de l'équipe adversaire (ne sert à rien)
+    	    translation = 1
+ 
+            
+        elif sensors["sensor_front_left"]["isRobot"] == True and sensors["sensor_front_left"]["isSameTeam"] == False:
+            translation = 1
+            rotation = -0.5  # rotation vers la gauche
+            
+        elif sensors["sensor_front_right"]["isRobot"] == True and sensors["sensor_front_right"]["isSameTeam"] == False:
+            translation = 1
+            rotation = 0.5  # rotation vers la droite
+            
+        elif sensors["sensor_back"]["isRobot"] == True and sensors["sensor_back"]["isSameTeam"] == False:
+            translation = -1
+            
+            
+        elif sensors["sensor_back_left"]["isRobot"] == True and sensors["sensor_back_left"]["isSameTeam"] == False:
+            translation = -1
+            rotation = -0.5  # rotation vers la gauche
+            
+        elif sensors["sensor_back_right"]["isRobot"] == True and sensors["sensor_back_right"]["isSameTeam"] == False:
+            translation = -1
+            rotation = 0.5  # rotation vers la droite
+
+         
+        elif sensors["sensor_front_left"]["distance"] < 1 or sensors["sensor_front"]["distance"] < 1:
+            rotation = 0.5  # rotation vers la droite
+        elif sensors["sensor_front_right"]["distance"] < 1:
+            rotation = -0.5 # rotation vers la gauche
+    
+
 def step(robotId, sensors):
 
     translation = 1 # vitesse de translation (entre -1 et +1)
