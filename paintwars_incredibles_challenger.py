@@ -9,14 +9,24 @@ import math
 def get_team_name():
     return "[ incredibles ]" # à compléter (comme vous voulez)
 
-def eviter_robot(sensors):
+def eviter_robot_right(sensors):
     translation = 1 * sensors["sensor_front"]["distance_to_robot"] 
-    rotation = (-1) * sensors["sensor_front_left"]["distance_to_robot"] + (1) * sensors["sensor_front_right"]["distance_to_robot"]
+    rotation = (-1) * sensors["sensor_front_left"]["distance_to_robot"] + (1) * sensors["sensor_front_right"]["distance_to_robot"] * (random.uniform(0.5, 1.5))
     return translation, rotation
 
-def eviter_les_murs(sensors):
+def eviter_robot_left(sensors):
+    translation = 1 * sensors["sensor_front"]["distance_to_robot"] 
+    rotation = (-1) * sensors["sensor_front_left"]["distance_to_robot"] + (1) * sensors["sensor_front_right"]["distance_to_robot"] * (-(random.uniform(0.5, 1.5)))
+    return translation, rotation
+
+def eviter_murs_right(sensors):
     translation = 1 * sensors["sensor_front"]["distance_to_wall"] 
-    rotation = (-1) * sensors["sensor_front_left"]["distance_to_wall"] + (1) * sensors["sensor_front_right"]["distance_to_wall"]
+    rotation = (-1) * sensors["sensor_front_left"]["distance_to_wall"] + (1) * sensors["sensor_front_right"]["distance_to_wall"] * (random.uniform(0.5, 1.5))
+    return translation, rotation
+
+def eviter_murs_left(sensors):
+    translation = 1 * sensors["sensor_front"]["distance_to_wall"] 
+    rotation = (-1) * sensors["sensor_front_left"]["distance_to_wall"] + (1) * sensors["sensor_front_right"]["distance_to_wall"] * (-(random.uniform(0.5, 1.5)))
     return translation, rotation
 
 def aller_front_ennemi(sensors):
@@ -38,12 +48,12 @@ def aleatoire(sensors):
     is_wall = sensors["sensor_front"]["distance_to_wall"] < 1 or sensors["sensor_front_left"]["distance_to_wall"] < 1 or sensors["sensor_front_right"]["distance_to_wall"] < 1
 
     if is_wall:
-        return eviter_les_murs(sensors)
+        return eviter_murs_left(sensors)
     if is_robot_front: 
-        return eviter_robot(sensors)
+        return eviter_robot_right(sensors)
     return translation, rotation
 
-def explore(sensors):
+def explore_1(sensors):
     """
     explore the arena
     Brainteberg condition for evaluation verified
@@ -57,9 +67,28 @@ def explore(sensors):
     rotation = (-1) * sensors["sensor_front_left"]["distance"] + (1) * sensors["sensor_front_right"]["distance"]
 
     if is_wall:
-        return eviter_les_murs(sensors)
+        return eviter_murs_left(sensors)
     if is_robot_front: 
-        return eviter_robot(sensors)
+        return eviter_robot_right(sensors)
+    return translation, rotation
+
+def explore_2(sensors):
+    """
+    explore the arena
+    Brainteberg condition for evaluation verified
+    évite les murs ET évite les robots
+    """
+    is_robot_front = sensors["sensor_front"]["distance_to_robot"] < 1 or sensors["sensor_front_left"]["distance_to_robot"] < 1 or sensors["sensor_front_right"]["distance_to_robot"] < 1
+    is_wall = sensors["sensor_front"]["distance_to_wall"] < 1 or sensors["sensor_front_left"]["distance_to_wall"] < 1 or sensors["sensor_front_right"]["distance_to_wall"] < 1
+
+    # Default values
+    translation = 1 * sensors["sensor_front"]["distance"] 
+    rotation = (-1) * sensors["sensor_front_left"]["distance"] + (1) * sensors["sensor_front_right"]["distance"]
+
+    if is_wall:
+        return eviter_murs_right(sensors)
+    if is_robot_front: 
+        return eviter_robot_left(sensors)
     return translation, rotation
 
 def follow_enemy_front(sensors):
@@ -75,8 +104,8 @@ def follow_enemy_front(sensors):
         translation = 1
         rotation = 0.5  # rotation vers la droite
     else:
-        translation = explore(sensors)[0]
-        rotation = explore(sensors)[1]
+        translation = explore_1(sensors)[0]
+        rotation = explore_1(sensors)[1]
 
     return translation, rotation
 
@@ -93,8 +122,8 @@ def follow_enemy_back(sensors):
         translation = -1
         rotation = 0.5  # rotation vers la droite
     else:
-        translation = explore(sensors)[0]
-        rotation = explore(sensors)[1]
+        translation = explore_1(sensors)[0]
+        rotation = explore_1(sensors)[1]
 
     return translation, rotation
 
@@ -120,10 +149,10 @@ def follow_enemy(sensors):
         return follow_enemy_back(sensors) 
 
     elif is_wall :
-        return eviter_les_murs(sensors)
+        return eviter_murs_right(sensors)
 
     elif is_teammate :
-        return eviter_robot(sensors)
+        return eviter_robot_left(sensors)
     
     return translation, rotation
 
@@ -144,10 +173,10 @@ def step(robotId, sensors):
         translation = follow_enemy(sensors)[0]
         rotation = follow_enemy(sensors)[1]
     elif robotId == 1 or robotId == 6:
-        translation = aleatoire(sensors)[0]
-        rotation = aleatoire(sensors)[1]
+        translation = explore_1(sensors)[0]
+        rotation = explore_1(sensors)[1]
     else:
-        translation = explore(sensors)[0]
-        rotation = explore(sensors)[1]
+        translation = explore_2(sensors)[0]
+        rotation = explore_2(sensors)[1]
 
     return translation, rotation
