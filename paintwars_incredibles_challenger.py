@@ -4,7 +4,6 @@
 #  Prénom Nom: Kaan DISLI
 #  Prénom Nom: Haya MAMLOUK
 import random
-import math
 
 translation = 1 
 rotation = 0
@@ -14,36 +13,54 @@ def get_team_name():
     return "[ incredibles ]" # à compléter (comme vous voulez)
 
 def eviter_robot_right(sensors):
+    """
+    évite les robots en tournant a droite. Braintenberg.
+    """
     global translation, rotation
     translation = 1 * sensors["sensor_front"]["distance_to_robot"] 
     rotation = (-1) * sensors["sensor_front_left"]["distance_to_robot"] + (1.1) * sensors["sensor_front_right"]["distance_to_robot"] * (random.uniform(0.5, 1.5))
     return translation, rotation
 
 def eviter_robot_left(sensors):
+    """
+    évite les robots en tournant a gauche. Braintenberg.
+    """
     global translation, rotation
     translation = 1 * sensors["sensor_front"]["distance_to_robot"] 
     rotation = (-1) * sensors["sensor_front_left"]["distance_to_robot"] + (1.1) * sensors["sensor_front_right"]["distance_to_robot"] * (-(random.uniform(0.5, 1.5)))
     return translation, rotation
 
 def eviter_murs_right(sensors):
+    """
+    évite les murs en tournant a droite. Braintenberg.
+    """
     global translation, rotation
     translation = 1 * sensors["sensor_front"]["distance_to_wall"] 
     rotation = (-1) * sensors["sensor_front_left"]["distance_to_wall"] + (1.1) * sensors["sensor_front_right"]["distance_to_wall"] * (random.uniform(0.5, 1.5))
     return translation, rotation
 
 def eviter_murs_left(sensors):
+    """
+    évite les murs en tournant a gauche. Braintenberg.
+    """
     global translation, rotation
     translation = 1 * sensors["sensor_front"]["distance_to_wall"] 
     rotation = (-1) * sensors["sensor_front_left"]["distance_to_wall"] + (1.1) * sensors["sensor_front_right"]["distance_to_wall"] * (-(random.uniform(0.5, 1.5)))
     return translation, rotation
 
 def aller_front_ennemi(sensors):
+    """
+    avance vers l'ennemi. Braintenberg.
+    """
     global translation, rotation
     translation = 1 * sensors["sensor_front"]["distance_to_robot"]
     rotation = (1) * sensors["sensor_front_left"]["distance_to_robot"] + (-1.1) * sensors["sensor_front_right"]["distance_to_robot"]
     return translation, rotation	
     
 def aller_back_ennemi(sensors):
+    """
+    recule vers l'ennemi. Braintenberg.
+    """
     global translation, rotation
     translation = -1 * sensors["sensor_back"]["distance_to_robot"]
     rotation = (1) * sensors["sensor_back_left"]["distance_to_robot"] + (-1.1) * sensors["sensor_front_right"]["distance_to_robot"]
@@ -52,7 +69,6 @@ def aller_back_ennemi(sensors):
 def explore_1(sensors):
     """
     explore the arena
-    Brainteberg condition for evaluation verified
     évite les murs ET évite les robots
     """
     global translation, rotation
@@ -68,7 +84,6 @@ def explore_1(sensors):
 def explore_2(sensors):
     """
     explore the arena
-    Brainteberg condition for evaluation verified
     évite les murs ET évite les robots
     """
     global translation, rotation
@@ -83,6 +98,9 @@ def explore_2(sensors):
     return translation, rotation
 
 def follow_enemy_front(sensors):
+    """
+    Suit un ennmis devant le robot
+    """
     global translation, rotation
     if sensors["sensor_front"]["isRobot"] == True and sensors["sensor_front"]["isSameTeam"] == False:
         translation = 1
@@ -102,6 +120,9 @@ def follow_enemy_front(sensors):
     return translation, rotation
 
 def follow_enemy_back(sensors):
+    """
+    Suit un ennmis derriere le robot
+    """
     global translation, rotation
     if sensors["sensor_back"]["isRobot"] == True and sensors["sensor_back"]["isSameTeam"] == False:
         translation = -1
@@ -122,7 +143,11 @@ def follow_enemy_back(sensors):
 
 def follow_enemy(sensors):
     """
-    FOLLOWS THE ENEMY (subsomption)
+    Suit un ennemi si détecter (subsomption)
+    1. suit l'ennemi devant le robot
+    2. suit l'ennemi derriere le robot
+    3. évite les murs
+    4. évite les coequipiers
     """
     global translation, rotation
     is_robot_front = sensors["sensor_front"]["distance_to_robot"] < 1 or sensors["sensor_front_left"]["distance_to_robot"] < 1 or sensors["sensor_front_right"]["distance_to_robot"] < 1
